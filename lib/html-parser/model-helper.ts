@@ -38,12 +38,13 @@ export class ModelHelper {
     }
 
     private normalizeWhiteSpaces = (text: string) => {
-        var index = 0;
+        let index = 0;
+        let src = text;
+        let skip = false;
 
-        var src = text;
-        var skip = false;
-        for (var i = 0; i < text.length; i++) {
-            var ch = text[i];
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+
             if (this._whitespace.includes(ch)) {
                 if (skip)
                     continue;
@@ -56,7 +57,7 @@ export class ModelHelper {
             }
         }
 
-        return src;
+        return src.slice(0, index);
     }
 
     private setCharAt = (str: string, index: number, chr: string): string => {
