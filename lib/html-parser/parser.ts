@@ -413,7 +413,7 @@ export class Parser {
             const attributes = this.parseAttributes();
             link = this._modelHelper.createLink(attributes, this._previousToken);
             if (link) this.parseLinkContent(link.childNodes);
-            this.expectClosingTag("a");
+            this.expectClosingTag('a');
         }
 
         return link;
@@ -645,7 +645,6 @@ export class Parser {
                 context.hasTrailingWhitespace = false;
             }
             else {
-                // TODO
                 this.normalizeWhitespace(node.childNodes, context);
             }
         }

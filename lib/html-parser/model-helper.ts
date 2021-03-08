@@ -1,6 +1,7 @@
 import { Reference, Token, Image, isNullOrWhitespace } from '../html-parser';
 import { decode } from 'html-entities';
-import { TextNode,
+import {
+    TextNode,
     EntityNode,
     IContentElement,
     ContentComponentElement,
@@ -10,7 +11,8 @@ import { TextNode,
     ImageElement,
     WebLinkNode,
     WebLinkTargets,
-    ContentItemLinkNode } from '../content';
+    ContentItemLinkNode
+} from '../content';
 
 export class ModelHelper {
     references: Reference[] = [];
@@ -79,7 +81,7 @@ export class ModelHelper {
         }
 
         const linkTypeAttribute = linkTypeAttributes[0];
-        if (linkTypeAttribute) {
+        if (!linkTypeAttribute) {
             this.throw(`The A element must have a 'href' attribute or a 'data-email-address' attribute or a data attribute that identifies the link target ('data-item-id', 'data-item-external-id', 'data-asset-id' or 'data-asset-external-id').`, context);
         }
 
@@ -108,11 +110,11 @@ export class ModelHelper {
                         this.throw(`The 'href' attribute of an A element that represents a URL link must have a value.`, context);
                     }
 
-                    return new WebLinkNode(
-                        uri,
-                        attributes['data-new-window'].toLowerCase() === 'true' ? WebLinkTargets.Blank : WebLinkTargets.Self,
-                        attributes['title']
-                    );
+                    const webLink = new WebLinkNode(uri);
+                    if (attributes['title'] !== '') webLink.title = attributes['title'];
+                    if (attributes['data-new-window'].toLowerCase() === 'true') webLink.target = WebLinkTargets.Blank;
+                    
+                    return webLink;
                 }
             case 'data-item-id':
                 {

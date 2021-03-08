@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "start": "node dist/lib/app.js",
     "prepublish": "npm run build",
     "build": "npm run test && tsc -p tsconfig.json",
     "test": "jest"

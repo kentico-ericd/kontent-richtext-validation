@@ -2,5 +2,9 @@ import { IContentNode, IListItemElement, ListElement, IContentElementWithText } 
 
 export class ListItemElement implements IListItemElement, IContentElementWithText {
     nestedList?: ListElement;
-    childNodes: IContentNode[] = [];
+    childNodes: IContentNode[];
+
+    constructor(childNodes: IContentNode[] = []) {
+        this.childNodes = childNodes;
+    }
 }
