@@ -4,8 +4,8 @@ import { HtmlConverter } from '../lib/html-converter/html-converter';
 describe('HtmlConverter', () => {
     const assert = (input: string, expected: string, strict: boolean = true) => {
         const converter = new HtmlConverter(strict);
-        var model = converter.convertFromHtml(input);
-        var output = converter.convertToHtml(model);
+        const model = converter.convertFromHtml(input);
+        const output = converter.convertToHtml(model);
 
         expect(output).toEqual(expected);
     };
@@ -30,15 +30,18 @@ describe('HtmlConverter', () => {
     theoretically('Listing element', theories, theory => assert(theory.input, theory.expected));
 
     theories = [
-        { input: `
+        {
+            input: `
 <ul>
     <li>text
         <ol>
             <li>another text</li>
         </ol>
     </li>
-</ul>`, expected: '<ul>\n  <li>text\n    <ol>\n      <li>another text</li>\n    </ol>\n  </li>\n</ul>' },
-        { input: `
+</ul>`, expected: '<ul>\n  <li>text\n    <ol>\n      <li>another text</li>\n    </ol>\n  </li>\n</ul>'
+        },
+        {
+            input: `
 <ul>
     <li>text
         <ol>
@@ -49,8 +52,10 @@ describe('HtmlConverter', () => {
             </li>
         </ol>
     </li>
-</ul>`, expected: '<ul>\n  <li>text\n    <ol>\n      <li>another text\n        <ul>\n          <li>yet another text</li>\n        </ul>\n      </li>\n    </ol>\n  </li>\n</ul>' },
-        { strict: false, input: `
+</ul>`, expected: '<ul>\n  <li>text\n    <ol>\n      <li>another text\n        <ul>\n          <li>yet another text</li>\n        </ul>\n      </li>\n    </ol>\n  </li>\n</ul>'
+        },
+        {
+            strict: false, input: `
 <ul>
     <li>text
         <ol>
@@ -67,8 +72,41 @@ describe('HtmlConverter', () => {
             <li>yet another non-strict text</li>
         </ul>
     </ol>
-</ul>`, expected: '<ul>\n  <li>text\n    <ol>\n      <li>another text\n        <ul>\n          <li>yet another text</li>\n        </ul>\n      </li>\n    </ol>\n  </li>\n  <ol>\n    <li>non-strict text</li>\n    <ul>\n      <li>yet another non-strict text</li>\n    </ul>\n  </ol>\n</ul>' }
+</ul>`, expected: '<ul>\n  <li>text\n    <ol>\n      <li>another text\n        <ul>\n          <li>yet another text</li>\n        </ul>\n      </li>\n    </ol>\n  </li>\n  <ol>\n    <li>non-strict text</li>\n    <ul>\n      <li>yet another non-strict text</li>\n    </ul>\n  </ol>\n</ul>'
+        }
     ];
     theoretically('Nested listing element', theories, theory => assert(theory.input, theory.expected, theory.strict));
+
+    theories = [
+        { input: '<table><tbody><tr><td>A1</td><td>A2</td></tr><tr><td><p>B1</p></td><td><h1>B21</h1><p>B22</p></td></tr></tbody></table>', expected: '<table><tbody>\n  <tr><td>A1</td><td>A2</td></tr>\n  <tr><td>B1</td><td><h1>B21</h1>\n<p>B22</p>\n</td></tr>\n</tbody></table>' }
+    ];
+    theoretically('Table element', theories, theory => assert(theory.input, theory.expected));
+
+    theories = [
+        {
+            input: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>',
+            expected: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>'
+        },
+        {
+            input: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>',
+            expected: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>'
+        },
+        {
+            input: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img></figure>',
+            expected: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>'
+        },
+        {
+            input: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>',
+            expected: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>'
+        },
+        {
+            input: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src=""></figure>',
+            expected: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>'
+        },
+        {
+            input: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src=" "></figure>',
+            expected: '<figure data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"><img src="#" data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444"></figure>'
+        }];
+        theoretically('Image element', theories, theory => assert(theory.input, theory.expected));
 
 });

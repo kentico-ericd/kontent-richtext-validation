@@ -71,13 +71,13 @@ export class HtmlConverter {
     private visitElements = (elements: IContentElement[], text: string): string => {
         for (const element of elements) {
             switch (element.constructor) {
-                case ParagraphElement: text += this.visitParagraph(<ParagraphElement>element, text); break;
-                case HeadingElement: text += this.visitHeading(<HeadingElement>element, text); break;
-                case ListElement: text += this.visitList(<ListElement>element, text); break;
-                case TableElement: text += this.visitTable(<TableElement>element, text); break;
-                case ImageElement: text += this.visitImage(element, text); break;
-                case ContentModuleElement: text += this.visitContentModule(element, text); break;
-                case ContentComponentElement: text += this.visitContentComponent(<ContentComponentElement>element, text); break;
+                case ParagraphElement: text = this.visitParagraph(<ParagraphElement>element, text); break;
+                case HeadingElement: text = this.visitHeading(<HeadingElement>element, text); break;
+                case ListElement: text = this.visitList(<ListElement>element, text); break;
+                case TableElement: text = this.visitTable(<TableElement>element, text); break;
+                case ImageElement: text = this.visitImage(element, text); break;
+                case ContentModuleElement: text = this.visitContentModule(element, text); break;
+                case ContentComponentElement: text = this.visitContentComponent(<ContentComponentElement>element, text); break;
                 default: throw new Error(`Unrecognized content element type: ${typeof element}"`);
             }
         }
@@ -108,17 +108,17 @@ export class HtmlConverter {
     private visitTable = (element: TableElement, text: string): string => {
         text += '<table><tbody>\n';
         for (const row of element.rows) {
-            text += this.visitTableRow(row, text);
+            text = this.visitTableRow(row, text);
         }
 
         return text + '</tbody></table>\n';
     }
 
     private visitTableRow = (row: TableRowElement, text: string): string => {
-        text += this.appendIndent(1, text);
+        text = this.appendIndent(1, text);
         text += '<tr>';
         for (const cell of row.cells) {
-            text += this.visitTableCell(cell, text);
+            text = this.visitTableCell(cell, text);
         }
 
         return text + '</tr>\n';
@@ -126,7 +126,7 @@ export class HtmlConverter {
 
     private visitTableCell = (cell: TableCellElement, text: string): string => {
         text += '<td>';
-        text += this.visitNestedContent(cell.childElements, text);
+        text = this.visitNestedContent(cell.childElements, text);
 
         return text + '</td>';
     }
@@ -198,7 +198,7 @@ export class HtmlConverter {
         if (elements.length === 1) {
             // Single paragraph content does not include the wrapping P tag in the output for backward compatibility
             const singleElement = elements[0];
-            switch (singleElement) {
+            switch (singleElement.constructor) {
                 case ParagraphElement:
                     return this.visitElementNodes((<ParagraphElement>singleElement).childNodes, text);
             }
@@ -245,19 +245,21 @@ export class HtmlConverter {
         }
 
         text += `<${tag}>`;
-        text += this.visitNodes(node.childNodes, text);
+        text = this.visitNodes(node.childNodes, text);
 
         return text + `</${tag}>`;
     }
 
     private visitEntityNode = (node: EntityNode, text: string): string => {
         switch (node.constructor) {
-            case WebLinkNode: return text + this.visitWebLinkNode(<WebLinkNode>node, text);
-            case EmailLinkNode: return text + this.visitEmailLinkNode(node, text);
-            case ContentItemLinkNode: return text + this.visitContentItemLinkNode(node, text);
-            case AssetLinkNode: return text + this.visitAssetLinkNode(node, text);
+            case WebLinkNode: text = this.visitWebLinkNode(<WebLinkNode>node, text);
+            case EmailLinkNode: text = this.visitEmailLinkNode(node, text);
+            case ContentItemLinkNode: text = this.visitContentItemLinkNode(node, text);
+            case AssetLinkNode: text = this.visitAssetLinkNode(node, text);
             default: throw new Error(`Unrecognized entity type: ${typeof node}`);
         }
+
+        return text;
     }
 
     private visitWebLinkNode = (node: WebLinkNode, text: string): string => {
@@ -273,7 +275,7 @@ export class HtmlConverter {
         }
 
         text += '>';
-        text += this.visitNodes(node.childNodes, text);
+        text = this.visitNodes(node.childNodes, text);
 
         return text + '</a>';
     }
@@ -285,21 +287,21 @@ export class HtmlConverter {
         }
 
         text += '>';
-        text += this.visitNodes(node.childNodes, text);
+        text = this.visitNodes(node.childNodes, text);
 
         return text + '</a>';
     }
 
     private visitContentItemLinkNode = (node: ContentItemLinkNode, text: string): string => {
         text += `<a data-item-id="${node.id}">`;
-        text += this.visitNodes(node.childNodes, text);
+        text = this.visitNodes(node.childNodes, text);
 
         return text + '</a>';
     }
 
     private visitAssetLinkNode = (node: AssetLinkNode, text: string): string => {
         text += `<a data-asset-id="${node.id}">`;
-        text += this.visitNodes(node.childNodes, text);
+        text = this.visitNodes(node.childNodes, text);
 
         return text + '</a>';
     }
