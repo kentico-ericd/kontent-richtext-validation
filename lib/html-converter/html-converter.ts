@@ -1,4 +1,5 @@
 import { encode } from 'html-entities';
+import { appendText, appendAttribute} from '../html-converter';
 import { isNullOrWhitespace, Scanner, Parser } from '../html-parser';
 import {
     InlineStyle,
@@ -15,7 +16,6 @@ import {
     TextNode,
     LineBreakNode,
     InlineStyleNode,
-    EntityNode,
     WebLinkNode,
     EmailLinkNode,
     ContentItemLinkNode,
@@ -59,11 +59,11 @@ export class HtmlConverter {
     }
 
     convertFromHtml = (value: string, contentComponents?: ContentComponentElement[] | null): RichTextContentModel => {
-        var scanner = new Scanner();
-        var tokens = scanner.scan(value);
+        const scanner = new Scanner();
+        const tokens = scanner.scan(value);
 
-        var parser = new Parser(this.strict);
-        var model = parser.parse(tokens, contentComponents);
+        const parser = new Parser(this.strict);
+        const model = parser.parse(tokens, contentComponents);
 
         return model;
     }
@@ -222,7 +222,10 @@ export class HtmlConverter {
                 case TextNode:  text = this.visitTextNode(<TextNode>node, text); break;
                 case LineBreakNode: text = this.visitLineBreakNode(text); break;
                 case InlineStyleNode: text = this.visitInlineStyleNode(<InlineStyleNode>node, text); break;
-                case EntityNode: text = this.visitEntityNode(node, text); break;
+                case WebLinkNode: text = this.visitWebLinkNode(<WebLinkNode>node, text); break;
+                case AssetLinkNode: text = this.visitAssetLinkNode(node, text); break;
+                case ContentItemLinkNode: text = this.visitContentItemLinkNode(node, text); break;
+                case EmailLinkNode: text = this.visitEmailLinkNode(<EmailLinkNode>node, text); break;
                 default: throw new Error(`Unrecognized node type: ${typeof node}`);
             }
         }
@@ -231,7 +234,7 @@ export class HtmlConverter {
     }
 
     private visitTextNode = (node: TextNode, text: string): string => {
-        return text + node.textContent;
+        return appendText(text, node.textContent);
     }
 
     private visitLineBreakNode = (text: string): string => {
@@ -250,20 +253,9 @@ export class HtmlConverter {
         return text + `</${tag}>`;
     }
 
-    private visitEntityNode = (node: EntityNode, text: string): string => {
-        switch (node.constructor) {
-            case WebLinkNode: text = this.visitWebLinkNode(<WebLinkNode>node, text);
-            case EmailLinkNode: text = this.visitEmailLinkNode(node, text);
-            case ContentItemLinkNode: text = this.visitContentItemLinkNode(node, text);
-            case AssetLinkNode: text = this.visitAssetLinkNode(node, text);
-            default: throw new Error(`Unrecognized entity type: ${typeof node}`);
-        }
-
-        return text;
-    }
-
     private visitWebLinkNode = (node: WebLinkNode, text: string): string => {
-        text += `<a href="${node.url}"`;
+        text += '<a';
+        text = appendAttribute(text, 'href', node.url);
         switch (node.target) {
             case WebLinkTargets.Self: break;
             case WebLinkTargets.Blank: text += ' data-new-window="true"'; break;
@@ -281,9 +273,11 @@ export class HtmlConverter {
     }
 
     private visitEmailLinkNode = (node: EmailLinkNode, text: string): string => {
-        text += `<a data-email-address="${node.to}"`;
-        if (!isNullOrWhitespace(node.subject)) {
-            text += `data-email-subject="${node.subject}"`;
+        text += '<a';
+        text = appendAttribute(text, 'data-email-address', node.to);
+
+        if (node.subject && node.subject !== '') {
+            text = appendAttribute(text, 'data-email-subject', node.subject);
         }
 
         text += '>';

@@ -615,6 +615,14 @@ export class Parser {
         this.expectElementToken(TokenType.ClosingTag, tagName);
     }
 
+    // Removes all instances of a string from the beginning and end of another string
+    private trim = (s:string, c:string):string => {
+        c = c.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+        return s.replace(new RegExp(
+          "^[" + c + "]+|[" + c + "]+$", "g"
+        ), "");
+      }
+
     private normalizeWhitespace = (nodes: IContentNode[], context?: NormalizeContext): IContentNode[] => {
         if (!context) context = new NormalizeContext(null, false, false);
         const whitespace = ['\t', '\n', '\f', '\r', ' '];
@@ -623,11 +631,11 @@ export class Parser {
             if (node instanceof TextNode) {
                 const textStartsWithWhitespace = whitespace.includes(node.textContent[0]);
                 const textEndsWithWhitespace = whitespace.includes(node.textContent[node.textContent.length - 1]);
-                node.textContent = node.textContent.trim();
+                for(const char of whitespace) node.textContent = this.trim(node.textContent, char);
 
                 if (node.textContent.length > 0) {
-                    if (context.hasContent && context.hasTrailingWhitespace) {
-                        context.setLastText(context.lastTextNode?.textContent + ' ');
+                    if (context.hasContent && context.hasTrailingWhitespace && context.lastTextNode) {
+                        context.lastTextNode.textContent = context.lastTextNode.textContent + ' ';
                     }
 
                     if (textStartsWithWhitespace && context.hasContent && !context.hasTrailingWhitespace) {

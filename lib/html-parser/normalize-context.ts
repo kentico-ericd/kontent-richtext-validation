@@ -10,8 +10,4 @@ export class NormalizeContext {
         this.hasContent = hasContent;
         this.hasTrailingWhitespace = hasTrailingWhitespace;
     }
-
-    setLastText = (text: string) => {
-        if(this.lastTextNode) this.lastTextNode.textContent = text;
-    }
 }

@@ -30,7 +30,7 @@ export class ModelHelper {
     // Required when resolving URL links
     private _unsafeProtocols: string[] = ['javascript:', 'data:', 'vbscript:'];
     private _guidRegex: RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    private _whitespaceRegex: RegExp = /[^\\w:]/m;
+    private _whitespaceRegex: RegExp = /[^\w:]+/gm;
     private _protocolRegex: RegExp = new RegExp('^(([A-Z]+://.+)|\\?|#|/)', 'i');
 
     constructor() { }
@@ -74,8 +74,17 @@ export class ModelHelper {
         // an <a data-email-address="info@kentico.com" data-email-subject="Hi there!">e-mail link</a>
         // and an <a data-asset-id="30a3a8c2-e9ab-47c2-84f4-e470985a3444">asset link</a>.</p>
 
-        const attributeKeys = Object.keys(attributes);
-        const linkTypeAttributes = attributeKeys.filter(v => this._linkAttributes.includes(v.toLowerCase()));
+        // Lowercase attribute keys
+        var key, keys = Object.keys(attributes);
+        var n = keys.length;
+        var normalizedAttributes: Record<string, string> = {};
+        while (n--) {
+            key = keys[n];
+            normalizedAttributes[key.toLowerCase()] = attributes[key];
+        }
+
+        const attributeKeys = Object.keys(normalizedAttributes);
+        const linkTypeAttributes = attributeKeys.filter(v => this._linkAttributes.includes(v));
         if (linkTypeAttributes.length > 1) {
             this.throw(`The A element must contain only one of the following HTML attributes: ${this._linkAttributes.join(',')}. These attributes define the link type and the link type cannot be mixed.`, context);
         }
@@ -85,34 +94,34 @@ export class ModelHelper {
             this.throw(`The A element must have a 'href' attribute or a 'data-email-address' attribute or a data attribute that identifies the link target ('data-item-id', 'data-item-external-id', 'data-asset-id' or 'data-asset-external-id').`, context);
         }
 
-        switch (linkTypeAttribute.toLowerCase()) {
+        switch (linkTypeAttribute) {
             case 'href':
                 {
                     if (!attributeKeys.includes('data-new-window')) {
-                        attributes['data-new-window'] = 'false';
+                        normalizedAttributes['data-new-window'] = 'false';
                     }
 
                     if (!attributeKeys.includes('title')) {
-                        attributes['title'] = '';
+                        normalizedAttributes['title'] = '';
                     }
 
-                    if (Object.values(attributes).length != 3) {
+                    if (Object.values(normalizedAttributes).length != 3) {
                         this.throw(`The A element that represents a URL link must have the 'href' attribute and, optionally, may have the 'data-new-window' and 'title' attributes.`, context);
                     }
 
-                    if (!['true', 'false'].includes(attributes['data-new-window'].toLowerCase())) {
+                    if (!['true', 'false'].includes(normalizedAttributes['data-new-window'].toLowerCase())) {
                         this.throw(`The 'data-new-window' attribute of an A element that represents a URL link must have a value 'true' or 'false'.`, context);
                     }
 
-                    var uri = this.resolveUri(attributes['href']);
+                    var uri = this.resolveUri(normalizedAttributes['href']);
 
                     if (isNullOrWhitespace(uri)) {
                         this.throw(`The 'href' attribute of an A element that represents a URL link must have a value.`, context);
                     }
 
                     const webLink = new WebLinkNode(uri);
-                    if (attributes['title'] !== '') webLink.title = attributes['title'];
-                    if (attributes['data-new-window'].toLowerCase() === 'true') webLink.target = WebLinkTargets.Blank;
+                    if (normalizedAttributes['title'] !== '') webLink.title = normalizedAttributes['title'];
+                    if (normalizedAttributes['data-new-window'].toLowerCase() === 'true') webLink.target = WebLinkTargets.Blank;
                     
                     return webLink;
                 }
@@ -122,8 +131,8 @@ export class ModelHelper {
                         this.throw(`The A element that represents a content item link must have only a 'data-item-id' or a 'data-item-external-id' attribute.`, context);
                     }
 
-                    if (this._guidRegex.test(attributes['data-item-id'])) {
-                        const contentItemLinkNode = new ContentItemLinkNode({ id: attributes['data-item-id'] });
+                    if (this._guidRegex.test(normalizedAttributes['data-item-id'])) {
+                        const contentItemLinkNode = new ContentItemLinkNode({ id: normalizedAttributes['data-item-id'] });
                         this.references.push(new Reference(contentItemLinkNode, context?.toReferenceContext()));
                         return contentItemLinkNode;
                     }
@@ -137,7 +146,7 @@ export class ModelHelper {
                         this.throw(`The A element that represents a content item link must have only a 'data-item-id' or a 'data-item-external-id' attribute.`, context);
                     }
 
-                    const contentItemLinkNode = new ContentItemLinkNode({ externalId: attributes['data-item-external-id'] });
+                    const contentItemLinkNode = new ContentItemLinkNode({ externalId: normalizedAttributes['data-item-external-id'] });
                     this.references.push(new Reference(contentItemLinkNode, context?.toReferenceContext()));
 
                     return contentItemLinkNode;
@@ -148,8 +157,8 @@ export class ModelHelper {
                         this.throw(`The A element that represents an asset link must have only a 'data-asset-id' or a 'data-asset-external-id' attribute.`, context);
                     }
 
-                    if (this._guidRegex.test(attributes['data-asset-id'])) {
-                        var assetLinkNode = new AssetLinkNode({ id: attributes['data-asset-id'] });
+                    if (this._guidRegex.test(normalizedAttributes['data-asset-id'])) {
+                        var assetLinkNode = new AssetLinkNode({ id: normalizedAttributes['data-asset-id'] });
                         this.references.push(new Reference(assetLinkNode, context?.toReferenceContext()));
 
                         return assetLinkNode;
@@ -164,7 +173,7 @@ export class ModelHelper {
                         this.throw(`The A element that represents an asset link must have only a 'data-asset-id' or a 'data-asset-external-id' attribute.`, context);
                     }
 
-                    var assetLinkNode = new AssetLinkNode({ externalId: attributes['data-asset-external-id'] });
+                    var assetLinkNode = new AssetLinkNode({ externalId: normalizedAttributes['data-asset-external-id'] });
                     this.references.push(new Reference(assetLinkNode, context?.toReferenceContext()));
 
                     return assetLinkNode;
@@ -172,20 +181,20 @@ export class ModelHelper {
             case 'data-email-address':
                 {
                     if (!attributeKeys.includes('data-email-subject')) {
-                        attributes['data-email-subject'] = '';
+                        normalizedAttributes['data-email-subject'] = '';
                     }
 
-                    if (attributeKeys.length != 2) {
+                    if (Object.keys(normalizedAttributes).length != 2) {
                         this.throw(`The A element that represents an e-mail link must have only a 'data-email-address' attribute and an optional 'data-email-subject' attribute.`, context);
                     }
 
-                    if (isNullOrWhitespace(attributes['data-email-address'])) {
+                    if (isNullOrWhitespace(normalizedAttributes['data-email-address'])) {
                         this.throw(`The 'data-email-address' attribute of an A element that represents an e-mail link must have a value.`, context);
                     }
 
                     return new EmailLinkNode({
-                        to: attributes['data-email-address'],
-                        subject: attributes["data-email-subject"]
+                        to: normalizedAttributes['data-email-address'],
+                        subject: normalizedAttributes["data-email-subject"]
                     });
                 }
         }
@@ -199,7 +208,7 @@ export class ModelHelper {
 
     private resolveUri = (input: string): string => {
         // This code is compatible with Kentico Kontent UI client, see the getUrlRelativeOrWithProtocol function
-        var cleanInput = decodeURI(input).replace(this._whitespaceRegex, '');
+        let cleanInput = decodeURI(input).replace(this._whitespaceRegex, '');
 
         if (this._unsafeProtocols.filter(x => cleanInput.toLowerCase().startsWith(x)).length > 0 || !this._protocolRegex.test(input)) {
             return `http://${input}`;

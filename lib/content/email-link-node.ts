@@ -1,7 +1,7 @@
 import { IContentNode, EntityNode } from '../content';
 
 export class EmailLinkNode implements EntityNode {
-    to?: string;
+    to: string = '';
     subject?: string;
     childNodes: IContentNode[] = [];
 
