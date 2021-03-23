@@ -59,7 +59,8 @@ if (match.length > 0) {
   e.value = text.replace(/<br>/g, '<br/>');
   const validationResult = KontentRichText.validate(e.value);
   if(!validationResult.success) {
-    const error = `Validation failed for item ${updatedVariant.data.item.id} element ${e.id}: ${validationResult.message}`;
+    const error = `Validation failed for item ${updatedVariant.data.item.id},`
+      + ` lang ${targetLangCode}, element ${e.id}: ${validationResult.message}`;
 
     // We can log the error
     console.log(error);
