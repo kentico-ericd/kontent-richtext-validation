@@ -1,1 +1,0 @@
-{"version":3,"file":"normalize-context.js","sourceRoot":"","sources":["../../../lib/html-parser/normalize-context.ts"],"names":[],"mappings":";;;AAEA;IAKI,0BAAY,YAA6B,EAAE,UAAmB,EAAE,qBAA8B;QAC1F,IAAI,CAAC,YAAY,GAAG,YAAY,CAAC;QACjC,IAAI,CAAC,UAAU,GAAG,UAAU,CAAC;QAC7B,IAAI,CAAC,qBAAqB,GAAG,qBAAqB,CAAC;IACvD,CAAC;IACL,uBAAC;AAAD,CAAC,AAVD,IAUC;AAVY,4CAAgB"}

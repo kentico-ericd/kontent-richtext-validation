@@ -1,6 +1,6 @@
 {
-  "name": "@kentico/kontent-richtext-validation",
-  "version": "1.0.0",
+  "name": "@kentico-ericd/kontent-richtext-validation",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
