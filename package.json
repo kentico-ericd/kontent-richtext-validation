@@ -1,6 +1,6 @@
 {
   "name": "@kentico-ericd/kontent-richtext-validation",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Provides a function to validate the content of a Rich Text element to ensure it's suitable for updating via the Kontent Management API.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
