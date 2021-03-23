@@ -56,21 +56,21 @@ Specifically, it could be added to [this line](https://github.com/Kentico/konten
 
 ```js
 if (match.length > 0) {
-	e.value = text.replace(/<br>/g, '<br/>');
-	const validationResult = KontentRichText.validate(e.value);
-	if(!validationResult.success) {
-		const error = `Validation failed for item ${updatedVariant.data.item.id} element ${e.id}: ${validationResult.message}`;
+  e.value = text.replace(/<br>/g, '<br/>');
+  const validationResult = KontentRichText.validate(e.value);
+  if(!validationResult.success) {
+    const error = `Validation failed for item ${updatedVariant.data.item.id} element ${e.id}: ${validationResult.message}`;
 
-        // We can log the error
-        console.log(error);
-        // We could write to some physical log file too
-        writeToLogFile(error);
-        // Send an email to devs?
-        sendEmail('devs@mysite.com', 'Webhook error', error);
-        // Skip this variant but continue with others
-        stopProcessing = true;
-        // or, maybe throw an error
-        throw new Error(error);
-	}
+    // We can log the error
+    console.log(error);
+    // We could write to some physical log file too
+    writeToLogFile(error);
+    // Send an email to devs?
+    sendEmail('devs@mysite.com', 'Webhook error', error);
+    // Skip this variant but continue with others
+    stopProcessing = true;
+    // or, maybe throw an error
+    throw new Error(error);
+  }
 }
 ```
