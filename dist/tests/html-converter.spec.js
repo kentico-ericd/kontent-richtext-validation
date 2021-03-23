@@ -172,6 +172,7 @@ describe('HtmlConverter', function () {
     theories = [
         { input: '<P>text</P>', expected: '<p>text</p>' },
         { input: '<P>text</p>', expected: '<p>text</p>' },
+        { input: '<p><A HREF="link">text</a></p>', expected: '<p><a href="http://link">text</a></p>' }
     ];
     jest_theories_1.default('Case insensitive', theories, function (theory) { return assert(theory.input, theory.expected); });
 });

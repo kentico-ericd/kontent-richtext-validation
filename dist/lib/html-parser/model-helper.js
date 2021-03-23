@@ -88,7 +88,7 @@ var ModelHelper = /** @class */ (function () {
                         if (!['true', 'false'].includes(normalizedAttributes['data-new-window'].toLowerCase())) {
                             _this.throw("The 'data-new-window' attribute of an A element that represents a URL link must have a value 'true' or 'false'.", context);
                         }
-                        var uri = _this.resolveUri(attributes['href']);
+                        var uri = _this.resolveUri(normalizedAttributes['href']);
                         if (html_parser_1.isNullOrWhitespace(uri)) {
                             _this.throw("The 'href' attribute of an A element that represents a URL link must have a value.", context);
                         }
