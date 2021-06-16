@@ -1,9 +1,9 @@
 import { HtmlConverter } from '../html-converter';
 
 export class KontentRichText {
-    static validate = (text: string) => {
+    static validate = (text: string, ignoreComponents: boolean = false) => {
         try {
-            const converter = new HtmlConverter(true, true);
+            const converter = new HtmlConverter(true, ignoreComponents);
             const model = converter.convertFromHtml(text);
             const result = converter.convertToHtml(model);
 
