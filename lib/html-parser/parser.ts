@@ -51,11 +51,11 @@ export class Parser {
 
     strict: boolean;
 
-    constructor(strict: boolean) {
+    constructor(strict: boolean, ignoreComponents: boolean = false) {
         this.strict = strict;
         this._currentToken = null;
         this._previousToken = null;
-        this._modelHelper = new ModelHelper();
+        this._modelHelper = new ModelHelper(ignoreComponents);
     }
 
     parse = (tokens: Token[], contentComponents: ContentComponentElement[] | null = null): RichTextContentModel => {

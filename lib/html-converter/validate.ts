@@ -3,7 +3,7 @@ import { HtmlConverter } from '../html-converter';
 export class KontentRichText {
     static validate = (text: string) => {
         try {
-            const converter = new HtmlConverter(true);
+            const converter = new HtmlConverter(true, true);
             const model = converter.convertFromHtml(text);
             const result = converter.convertToHtml(model);
 

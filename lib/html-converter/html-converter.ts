@@ -30,9 +30,11 @@ import {
 
 export class HtmlConverter {
     strict: boolean;
+    ignoreComponents: boolean;
 
-    constructor(strict: boolean) {
+    constructor(strict: boolean, ignoreComponents: boolean = false) {
         this.strict = strict;
+        this.ignoreComponents = ignoreComponents;
     }
 
     static tagsByInlineStyle: Record<InlineStyle, string> = {
@@ -62,7 +64,7 @@ export class HtmlConverter {
         const scanner = new Scanner();
         const tokens = scanner.scan(value);
 
-        const parser = new Parser(this.strict);
+        const parser = new Parser(this.strict, this.ignoreComponents);
         const model = parser.parse(tokens, contentComponents);
 
         return model;

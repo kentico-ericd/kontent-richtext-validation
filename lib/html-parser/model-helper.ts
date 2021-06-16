@@ -16,6 +16,8 @@ import {
 
 export class ModelHelper {
     references: Reference[] = [];
+    ignoreComponents: boolean;
+
     private _whitespace: string[] = ['\t', '\n', '\f', '\r', ' '];
     private _linkAttributes: string[] = [
         'href',
@@ -33,7 +35,9 @@ export class ModelHelper {
     private _whitespaceRegex: RegExp = /[^\w:]+/gm;
     private _protocolRegex: RegExp = new RegExp('^(([A-Z]+://.+)|\\?|#|/)', 'i');
 
-    constructor() { }
+    constructor(ignoreComponents: boolean = false) {
+        this.ignoreComponents = ignoreComponents;
+    }
 
     createTextNode = (text: string): TextNode => {
         return new TextNode(decode(this.normalizeWhiteSpaces(text)));
@@ -122,7 +126,7 @@ export class ModelHelper {
                     const webLink = new WebLinkNode(uri);
                     if (normalizedAttributes['title'] !== '') webLink.title = normalizedAttributes['title'];
                     if (normalizedAttributes['data-new-window'].toLowerCase() === 'true') webLink.target = WebLinkTargets.Blank;
-                    
+
                     return webLink;
                 }
             case 'data-item-id':
@@ -307,14 +311,20 @@ export class ModelHelper {
 
     private createContentComponent = (attributes: Record<string, string>, context: Token | null, components?: ContentComponentElement[] | null): IContentElement | null => {
         if (Object.keys(attributes).includes('data-id') && this._guidRegex.test(attributes["data-id"])) {
-            const component = components?.filter(c => c.id == attributes['data-id'])[0];
-            if (!component) {
-                this.throw("The component OBJECT has a data-id not matching any component in the components array.", context);
-                return null;
-            }
+            if(!this.ignoreComponents) {
+                const component = components?.filter(c => c.id == attributes['data-id'])[0];
+                if (!component) {
+                    this.throw("The component OBJECT has a data-id not matching any component in the components array.", context);
+                    return null;
+                }
 
-            const contentComponentElement = new ContentComponentElement(attributes['data-id'], component.type.id, component.componentElements);
-            return contentComponentElement;
+                const contentComponentElement = new ContentComponentElement(attributes['data-id'], component.type.id, component.componentElements);
+                return contentComponentElement;
+            }
+            else {
+                // Skipped component validation
+                return new ContentComponentElement(attributes['data-id'], '', null);
+            }
         }
 
         this.throw("The OBJECT element must have a 'data-id' attribute that identifies a content component.", context);
